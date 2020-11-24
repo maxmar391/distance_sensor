@@ -1,31 +1,31 @@
-#include <Wire.h>
-#include "SparkFun_VL53L1X.h"
+#include <Wire.h> //Import wire library
+#include <VL53L0X.h> //Import VL530X library
 
-//Optional interrupt and shutdown pins.
-//#define SHUTDOWN_PIN 2
-//#define INTERRUPT_PIN 3
+VL53L0X myDistanceSensor; //Initialize the sensor object
 
-SFEVL53L1X distanceSensor;
-
-void setup(void)
+void setup()
 {
-  Wire.begin();
+    Wire.begin();
+    
+    Serial.begin(9600);
+    Serial.println("VL53L0X Test, starting the sensor...");
 
-  Serial.begin(9600);
-  Serial.println("VL53L1X Sensor Test");
+    myDistanceSensor.init();
+    myDistanceSensor.setTimeout(500);
+    myDistanceSensor.startContinuous(); //Using continuous time mode place inter-measurement period in ms ex: .startContinuous(100)).
 
-  if (distanceSensor.init() == false)
-    Serial.println("Sensor online!");
+    delay(200);
 }
 
-void loop(void)
+void loop()
 {
-  distanceSensor.startRanging(); //Write configuration bytes to initiate measurement
-  int distance = distanceSensor.getDistance(); //Get the result of the measurement from the sensor
-  distanceSensor.stopRanging();
-
-  Serial.print("Distance(mm): ");
-  Serial.println(distance);
-
-  delay(1000);
+    int distance = myDistanceSensor.readRangeContinuousMillimeters();
+    Serial.print("Distance =");
+    Serial.print(distance);
+    Serial.println(" mm");
+    if (myDistanceSensor.timeoutOccurred())
+	{
+        Serial.println("TIMEOUT");
+    }
+    delay(1000);
 }
